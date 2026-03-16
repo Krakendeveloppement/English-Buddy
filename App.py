@@ -13,7 +13,9 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# CSS personnalisé avec couleurs améliorées
+# -------------------------------
+# CSS PERSONNALISÉ (adaptatif clair/sombre)
+# -------------------------------
 st.markdown("""
 <style>
     /* Variables pour les deux thèmes */
@@ -176,6 +178,7 @@ st.markdown("""
         border-left: 5px solid var(--accent-color);
     }
 </style>
+""", unsafe_allow_html=True)
 
 # -------------------------------
 # DONNÉES ÉLARGIES
@@ -320,8 +323,6 @@ if "nb_quiz" not in st.session_state:
     st.session_state.nb_quiz = 0
 if "verbe_quiz" not in st.session_state:
     st.session_state.verbe_quiz = None
-if "mode_verbe" not in st.session_state:
-    st.session_state.mode_verbe = "base"  # base, preterit, participe
 if "phrase_jour" not in st.session_state:
     st.session_state.phrase_jour = None
 if "pendu_mot" not in st.session_state:
@@ -390,7 +391,7 @@ def nouveau_pendu():
 # -------------------------------
 
 st.markdown('<h1 class="title">🇬🇧 English Buddy ++</h1>', unsafe_allow_html=True)
-st.markdown('<p style="text-align:center;">Created by <strong>Krakendeveloppement</strong></p>', unsafe_allow_html=True)
+st.markdown('<p class="subtitle">Created by <strong>Krakendeveloppement</strong></p>', unsafe_allow_html=True)
 
 # Sidebar avec progression et menu
 with st.sidebar:
@@ -425,22 +426,18 @@ with st.sidebar:
     st.markdown("Partage cette app avec tes amis ! 📲")
 
 # -------------------------------
-# ÉCRAN MENU
+# ÉCRAN MENU (amélioré)
 # -------------------------------
 if st.session_state.etape == "menu":
-    st.markdown("## Bienvenue sur English Buddy ++")
     st.markdown("""
     <div class="menu-card">
-        <h3>Choisis une activité pour commencer :</h3>
-        <p>💬 <strong>Conversation</strong> : Parle avec moi en anglais.</p>
-        <p>📚 <strong>Vocabulaire</strong> : Apprends de nouveaux mots avec des quiz.</p>
-        <p>🔤 <strong>Verbes irréguliers</strong> : Entraîne-toi sur les verbes.</p>
-        <p>💬 <strong>Phrase du jour</strong> : Une phrase utile chaque jour.</p>
-        <p>🎮 <strong>Jeu du pendu</strong> : Devine le mot en anglais.</p>
-        <p>📖 <strong>Leçon du jour</strong> : Une leçon rapide chaque jour.</p>
-        <p>Plus tu pratiques, plus ton score augmente ! 🚀</p>
+        <h3 style="text-align:center; margin-top:0;">Bienvenue sur English Buddy ++</h3>
+        <p style="text-align:center;">Choisis une activité pour commencer :</p>
     </div>
     """, unsafe_allow_html=True)
+    
+    # Grille de boutons 3x2
+    st.markdown('<div class="menu-grid">', unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -458,6 +455,7 @@ if st.session_state.etape == "menu":
             st.session_state.etape = "lecon"
             st.rerun()
     
+    # Deuxième ligne
     col1, col2, col3 = st.columns(3)
     with col1:
         if st.button("🔤 Verbes", use_container_width=True):
@@ -477,6 +475,16 @@ if st.session_state.etape == "menu":
             st.session_state.pendu_lettres_trouvees = lettres
             st.session_state.pendu_essais = essais
             st.rerun()
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Message d'encouragement
+    st.markdown("""
+    <div style="text-align:center; margin-top:20px; padding:15px; background-color:var(--bg-secondary); border-radius:15px; border:1px solid var(--border-color);">
+        Plus tu pratiques, plus ton score augmente ! 🚀<br>
+        <span style="font-size:0.9em;">Partage cette app avec tes amis ! 📲</span>
+    </div>
+    """, unsafe_allow_html=True)
 
 # -------------------------------
 # MODE CONVERSATION
