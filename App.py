@@ -79,9 +79,11 @@ if "mot_prononciation" not in st.session_state:
         "pronunciation", "speak", "listen", "learn", "english", "friend", "family",
         "weather", "coffee", "restaurant", "beautiful", "interesting", "development"
     ])
+if "prononciation_reussie" not in st.session_state:
+    st.session_state.prononciation_reussie = False
 
 # -------------------------------
-# CSS PERSONNALISÉ
+# CSS PERSONNALISÉ (adaptatif)
 # -------------------------------
 st.markdown("""
 <style>
@@ -176,9 +178,6 @@ st.markdown("""
         font-size: 0.9em;
         opacity: 0.7;
     }
-    .level-selector button {
-        font-size: 1.2em !important;
-    }
     .pronunciation-box {
         text-align: center;
         padding: 30px;
@@ -191,27 +190,231 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # -------------------------------
-# BASES DE DONNÉES ENRICHIES
+# BASES DE DONNÉES COMPLÈTES
 # -------------------------------
 
-# (Les dictionnaires de vocabulaire, verbes, phrases, etc. sont inchangés, je les reprends du code précédent)
-vocabulaire_debutant = { ... }  # Pour la concision, je ne réécris pas tout, mais dans le code final il faut les inclure
-vocabulaire_intermediaire = { ... }
-vocabulaire_professionnel = { ... }
-vocabulaire_par_niveau = { ... }
-verbes_irreguliers = [ ... ]
-phrases_du_jour = [ ... ]
-reponses_bot = { ... }
-lecons_journalieres = { ... }
-mots_prononciation = [ ... ]
+# Vocabulaire débutant (mots simples et courants)
+vocabulaire_debutant = {
+    "bonjour": "hello", "merci": "thank you", "au revoir": "goodbye", "maison": "house",
+    "voiture": "car", "chien": "dog", "chat": "cat", "manger": "eat", "boire": "drink",
+    "dormir": "sleep", "aimer": "love", "parler": "speak", "travail": "work", "école": "school",
+    "livre": "book", "stylo": "pen", "table": "table", "chaise": "chair", "porte": "door",
+    "fenêtre": "window", "soleil": "sun", "lune": "moon", "étoile": "star", "ciel": "sky",
+    "eau": "water", "feu": "fire", "terre": "earth", "air": "air", "grand": "big",
+    "petit": "small", "chaud": "hot", "froid": "cold", "content": "happy", "triste": "sad",
+    "vite": "fast", "lent": "slow", "jour": "day", "nuit": "night", "homme": "man",
+    "femme": "woman", "enfant": "child", "père": "father", "mère": "mother", "frère": "brother",
+    "sœur": "sister", "ami": "friend", "ville": "city", "mer": "sea", "montagne": "mountain",
+    "forêt": "forest", "animal": "animal", "oiseau": "bird", "poisson": "fish", "cheval": "horse",
+    "vache": "cow", "fleur": "flower", "arbre": "tree", "pomme": "apple", "banane": "banana",
+    "orange": "orange", "pain": "bread", "fromage": "cheese", "lait": "milk", "œuf": "egg",
+    "viande": "meat", "riz": "rice", "café": "coffee", "thé": "tea", "jus": "juice",
+    "rouge": "red", "bleu": "blue", "vert": "green", "jaune": "yellow", "noir": "black",
+    "blanc": "white", "vêtement": "clothes", "chemise": "shirt", "pantalon": "pants", "chaussure": "shoe"
+}
+
+# Vocabulaire intermédiaire (plus varié)
+vocabulaire_intermediaire = {
+    "ordinateur": "computer", "téléphone": "phone", "avion": "plane", "train": "train",
+    "bus": "bus", "bateau": "boat", "campagne": "countryside", "forêt": "forest",
+    "lion": "lion", "tigre": "tiger", "éléphant": "elephant", "girafe": "giraffe",
+    "singe": "monkey", "serpent": "snake", "fraise": "strawberry", "raisin": "grape",
+    "pâtes": "pasta", "soupe": "soup", "salade": "salad", "bière": "beer", "vin": "wine",
+    "chaussette": "sock", "chapeau": "hat", "manteau": "coat", "robe": "dress", "jupe": "skirt",
+    "couleur": "color", "rose": "pink", "violet": "purple", "marron": "brown", "gris": "gray",
+    "magasin": "shop", "marché": "market", "hôpital": "hospital", "banque": "bank",
+    "restaurant": "restaurant", "hôtel": "hotel", "plage": "beach", "piscine": "pool",
+    "jardin": "garden", "cuisine": "kitchen", "chambre": "bedroom", "salon": "living room",
+    "salle de bain": "bathroom", "toit": "roof", "mur": "wall", "sol": "floor",
+    "miroir": "mirror", "lampe": "lamp", "lit": "bed", "canapé": "sofa", "armoire": "wardrobe",
+    "étagère": "shelf", "fourchette": "fork", "couteau": "knife", "cuillère": "spoon",
+    "assiette": "plate", "verre": "glass", "tasse": "cup", "bol": "bowl", "poêle": "pan",
+    "casserole": "pot", "four": "oven", "réfrigérateur": "fridge", "congélateur": "freezer"
+}
+
+# Vocabulaire professionnel (mots techniques, affaires)
+vocabulaire_professionnel = {
+    "réunion": "meeting", "contrat": "contract", "client": "client", "fournisseur": "supplier",
+    "marché": "market", "vente": "sale", "achat": "purchase", "négociation": "negotiation",
+    "stratégie": "strategy", "objectif": "goal", "performance": "performance", "bénéfice": "profit",
+    "perte": "loss", "investissement": "investment", "budget": "budget", "prévision": "forecast",
+    "analyse": "analysis", "rapport": "report", "présentation": "presentation", "projet": "project",
+    "délai": "deadline", "livrable": "deliverable", "ressource": "resource", "équipe": "team",
+    "management": "management", "leadership": "leadership", "compétence": "skill", "formation": "training",
+    "embauche": "hiring", "entretien": "interview", "salaire": "salary", "avantage": "benefit",
+    "CDI": "permanent contract", "CDD": "fixed-term contract", "stage": "internship",
+    "alternance": "work-study", "télétravail": "remote work", "bureau": "office",
+    "logiciel": "software", "matériel": "hardware", "réseau": "network", "sécurité": "security",
+    "donnée": "data", "base de données": "database", "application": "application", "site web": "website",
+    "e-mail": "email", "appel": "call", "conférence": "conference", "visioconférence": "videoconference",
+    "ordre du jour": "agenda", "procès-verbal": "minutes", "note de frais": "expense report",
+    "facture": "invoice", "paiement": "payment", "remboursement": "reimbursement", "taux": "rate",
+    "devise": "currency", "euro": "euro", "dollar": "dollar", "livre sterling": "pound"
+}
+
+vocabulaire_par_niveau = {
+    "Débutant": vocabulaire_debutant,
+    "Intermédiaire": vocabulaire_intermediaire,
+    "Professionnel": vocabulaire_professionnel
+}
+
+# Verbes irréguliers (pour QCM)
+verbes_irreguliers = [
+    {"base": "be", "preterit": "was/were", "participe": "been", "francais": "être"},
+    {"base": "have", "preterit": "had", "participe": "had", "francais": "avoir"},
+    {"base": "do", "preterit": "did", "participe": "done", "francais": "faire"},
+    {"base": "say", "preterit": "said", "participe": "said", "francais": "dire"},
+    {"base": "go", "preterit": "went", "participe": "gone", "francais": "aller"},
+    {"base": "get", "preterit": "got", "participe": "gotten", "francais": "obtenir"},
+    {"base": "make", "preterit": "made", "participe": "made", "francais": "fabriquer"},
+    {"base": "know", "preterit": "knew", "participe": "known", "francais": "savoir"},
+    {"base": "think", "preterit": "thought", "participe": "thought", "francais": "penser"},
+    {"base": "take", "preterit": "took", "participe": "taken", "francais": "prendre"},
+    {"base": "see", "preterit": "saw", "participe": "seen", "francais": "voir"},
+    {"base": "come", "preterit": "came", "participe": "come", "francais": "venir"},
+    {"base": "want", "preterit": "wanted", "participe": "wanted", "francais": "vouloir"},
+    {"base": "give", "preterit": "gave", "participe": "given", "francais": "donner"},
+    {"base": "find", "preterit": "found", "participe": "found", "francais": "trouver"},
+    {"base": "eat", "preterit": "ate", "participe": "eaten", "francais": "manger"},
+    {"base": "drink", "preterit": "drank", "participe": "drunk", "francais": "boire"},
+    {"base": "sleep", "preterit": "slept", "participe": "slept", "francais": "dormir"},
+    {"base": "run", "preterit": "ran", "participe": "run", "francais": "courir"},
+    {"base": "swim", "preterit": "swam", "participe": "swum", "francais": "nager"},
+    {"base": "write", "preterit": "wrote", "participe": "written", "francais": "écrire"},
+    {"base": "read", "preterit": "read", "participe": "read", "francais": "lire"},
+    {"base": "speak", "preterit": "spoke", "participe": "spoken", "francais": "parler"},
+    {"base": "understand", "preterit": "understood", "participe": "understood", "francais": "comprendre"}
+]
+
+# Phrases du jour enrichies
+phrases_du_jour = [
+    {"francais": "Quel temps fait-il aujourd'hui ?", "anglais": "What's the weather like today?"},
+    {"francais": "Je voudrais un café, s'il vous plaît.", "anglais": "I would like a coffee, please."},
+    {"francais": "Où se trouve la gare ?", "anglais": "Where is the train station?"},
+    {"francais": "Combien ça coûte ?", "anglais": "How much does it cost?"},
+    {"francais": "Pouvez-vous m'aider ?", "anglais": "Can you help me?"},
+    {"francais": "Je suis perdu.", "anglais": "I am lost."},
+    {"francais": "Parlez-vous anglais ?", "anglais": "Do you speak English?"},
+    {"francais": "Je m'appelle...", "anglais": "My name is..."},
+    {"francais": "Enchanté.", "anglais": "Nice to meet you."},
+    {"francais": "À plus tard.", "anglais": "See you later."},
+    {"francais": "Quelle heure est-il ?", "anglais": "What time is it?"},
+    {"francais": "Je dois y aller.", "anglais": "I have to go."},
+    {"francais": "Pouvez-vous répéter ?", "anglais": "Can you repeat?"},
+    {"francais": "Je ne comprends pas.", "anglais": "I don't understand."},
+    {"francais": "Parlez plus lentement.", "anglais": "Speak more slowly."}
+]
+
+# Réponses du bot pour la conversation
+reponses_bot = {
+    "salutation": [
+        "Hello! How are you today?",
+        "Hi there! Nice to see you.",
+        "Hey! Ready to practice English?",
+        "Good morning! How's your day going?",
+        "Hello! What would you like to talk about?"
+    ],
+    "forme": [
+        "I'm doing great, thanks for asking!",
+        "I'm fine, just a bot but happy to chat.",
+        "All systems operational! 😊 How about you?",
+        "I'm good! Tell me something interesting."
+    ],
+    "remerciement": [
+        "You're welcome!",
+        "My pleasure!",
+        "Anytime!",
+        "Glad I could help!"
+    ],
+    "au_revoir": [
+        "Goodbye! Come back soon!",
+        "See you later! Keep practicing.",
+        "Bye! Have a great day!",
+        "Take care! See you next time."
+    ],
+    "meteo": [
+        "I wish I could go outside, but I'm just a program!",
+        "I don't experience weather, but I hope it's nice where you are.",
+        "Maybe check a weather app? I'm not connected to the internet."
+    ],
+    "nom": [
+        "My name is English Buddy! Created by Krakendeveloppement.",
+        "I'm your personal English tutor. You can call me Buddy.",
+        "I don't have a name, but you can give me one if you like!"
+    ],
+    "age": [
+        "I was just born when you started this conversation!",
+        "I'm timeless, like the English language.",
+        "I'm as old as the internet... well, not really."
+    ],
+    "origine": [
+        "I come from the beautiful world of Python code.",
+        "I was created by a developer who loves helping people learn.",
+        "My home is in the cloud, but I'm always here for you."
+    ],
+    "inconnu": [
+        "That's interesting! Tell me more.",
+        "I'm not sure I understand. Could you rephrase?",
+        "Hmm, I'm still learning. Try something simpler!",
+        "I didn't catch that. What do you mean?",
+        "Let's change the subject. What do you want to learn today?"
+    ],
+    "encouragement": [
+        "Great job!",
+        "Excellent!",
+        "Well done!",
+        "Perfect!",
+        "You're making progress!",
+        "Keep up the good work!"
+    ]
+}
+
+# Leçons du jour (grammaire)
+lecons_journalieres = {
+    "lundi": "📘 **Present Simple** – I eat, you eat, he eats.",
+    "mardi": "📙 **Past Simple** – I ate, you ate, he ate.",
+    "mercredi": "📕 **Future with 'will'** – I will eat, you will eat.",
+    "jeudi": "📗 **Prepositions** – in, on, at.",
+    "vendredi": "📓 **Modal verbs** – can, must, should.",
+    "samedi": "📔 **Adjectives** – big, small, happy, sad.",
+    "dimanche": "📒 **Adverbs** – quickly, slowly, well."
+}
+
+# Liste de mots pour la prononciation
+mots_prononciation = [
+    "hello", "world", "apple", "banana", "computer", "language", "practice",
+    "pronunciation", "speak", "listen", "learn", "english", "friend", "family",
+    "weather", "coffee", "restaurant", "beautiful", "interesting", "development"
+]
 
 # -------------------------------
 # FONCTIONS UTILITAIRES
 # -------------------------------
 
 def get_bot_reponse(message):
-    # ... (identique)
-    pass
+    """Génère une réponse du bot basée sur des mots-clés."""
+    msg = message.lower()
+    
+    if re.search(r"\b(hello|hi|hey|bonjour|salut|bonsoir)\b", msg):
+        return random.choice(reponses_bot["salutation"])
+    elif re.search(r"\b(how are you|ça va|comment ça va|comment allez-vous)\b", msg):
+        return random.choice(reponses_bot["forme"])
+    elif re.search(r"\b(merci|thanks|thank you|thx)\b", msg):
+        return random.choice(reponses_bot["remerciement"])
+    elif re.search(r"\b(bye|goodbye|au revoir|à bientôt|see you|tchao)\b", msg):
+        return random.choice(reponses_bot["au_revoir"])
+    elif re.search(r"\b(météo|weather|temps|soleil|pluie)\b", msg):
+        return random.choice(reponses_bot["meteo"])
+    elif re.search(r"\b(t appel|nom|name|appelles)\b", msg) and re.search(r"\b(qui|what|comment)\b", msg):
+        return random.choice(reponses_bot["nom"])
+    elif re.search(r"\b(âge|age|vieux|old)\b", msg):
+        return random.choice(reponses_bot["age"])
+    elif re.search(r"\b(origine|origin|viens|from|where)\b", msg) and re.search(r"\b(tu|you)\b", msg):
+        return random.choice(reponses_bot["origine"])
+    else:
+        if random.random() < 0.3:
+            return random.choice(reponses_bot["encouragement"]) + " " + random.choice(reponses_bot["inconnu"])
+        return random.choice(reponses_bot["inconnu"])
 
 def ajouter_point():
     st.session_state.score += 1
@@ -228,6 +431,7 @@ def ajouter_point():
         save_progress(progress)
 
 def nouvelle_question_quiz():
+    """Retourne une paire (français, anglais) sans répétition récente."""
     vocab = vocabulaire_par_niveau[st.session_state.niveau_utilisateur]
     disponibles = [(fr, en) for fr, en in vocab.items() if fr not in st.session_state.derniers_mots]
     if not disponibles:
@@ -240,8 +444,34 @@ def nouvelle_question_quiz():
     return fr, en
 
 def generer_qcm_verbe():
-    # ... (identique)
-    pass
+    """Génère un QCM sur un verbe irrégulier."""
+    verbe = random.choice(verbes_irreguliers)
+    forme = random.choice(["base", "preterit", "participe"])
+    if forme == "base":
+        question = f"Quelle est la forme de base du verbe '{verbe['francais']}' ?"
+        bonne_reponse = verbe['base']
+    elif forme == "preterit":
+        question = f"Quel est le prétérit de '{verbe['base']}' ({verbe['francais']}) ?"
+        bonne_reponse = verbe['preterit']
+    else:
+        question = f"Quel est le participe passé de '{verbe['base']}' ({verbe['francais']}) ?"
+        bonne_reponse = verbe['participe']
+    
+    mauvaises = []
+    while len(mauvaises) < 3:
+        autre = random.choice(verbes_irreguliers)
+        if forme == "base":
+            rep = autre['base']
+        elif forme == "preterit":
+            rep = autre['preterit']
+        else:
+            rep = autre['participe']
+        if rep != bonne_reponse and rep not in mauvaises:
+            mauvaises.append(rep)
+    
+    options = [bonne_reponse] + mauvaises
+    random.shuffle(options)
+    return question, bonne_reponse, options
 
 # -------------------------------
 # PAGE D'AUTHENTIFICATION
@@ -249,6 +479,7 @@ def generer_qcm_verbe():
 def auth_page():
     st.markdown('<h1 class="title">🇬🇧 English Buddy ++</h1>', unsafe_allow_html=True)
     st.markdown('<p class="subtitle">Created by <strong>Krakendeveloppement</strong></p>', unsafe_allow_html=True)
+    
     with st.container():
         st.markdown('<div class="card">', unsafe_allow_html=True)
         col1, col2 = st.columns(2)
@@ -258,7 +489,9 @@ def auth_page():
         with col2:
             if st.button("📝 Inscription", use_container_width=True):
                 st.session_state.auth_mode = "register"
+        
         st.markdown("---")
+        
         if st.session_state.auth_mode == "login":
             st.subheader("Connexion")
             email = st.text_input("Email")
@@ -297,13 +530,14 @@ def auth_page():
                         st.success("Inscription réussie !")
                         time.sleep(1)
                         st.rerun()
+        
         st.markdown('</div>', unsafe_allow_html=True)
 
 # -------------------------------
-# COMPOSANT DE PRONONCIATION AVEC REDIRECTION AUTOMATIQUE
+# COMPOSANT DE PRONONCIATION AVEC BOUTON SUIVANT
 # -------------------------------
 def pronunciation_component(word):
-    """Génère le HTML pour la prononciation avec redirection auto en cas de succès"""
+    """HTML/JS pour la prononciation. Envoie un message à Streamlit en cas de succès."""
     html_code = f"""
     <div style="text-align:center; padding:20px;">
         <div style="font-size:3em; margin-bottom:20px;">🔊 {word}</div>
@@ -335,14 +569,13 @@ def pronunciation_component(word):
             recognition.onresult = function(event) {{
                 const spoken = event.results[0][0].transcript.trim().toLowerCase();
                 const expected = word.toLowerCase();
+                // Comparaison simple (tolérance pour les petites erreurs)
                 const isCorrect = (spoken === expected) || (spoken.includes(expected) && expected.length > 3);
                 
                 if (isCorrect) {{
-                    resultDiv.innerHTML = '✅ Parfait ! Passage au mot suivant...';
-                    // Redirection avec paramètre pour indiquer le succès
-                    setTimeout(() => {{
-                        window.location.href = window.location.href.split('?')[0] + '?pronounce_success=true';
-                    }}, 1500);
+                    resultDiv.innerHTML = '✅ Parfait !';
+                    // Envoyer un message à Streamlit pour indiquer le succès
+                    window.parent.postMessage({{ type: 'pronunciation_success', word: word }}, '*');
                 }} else {{
                     resultDiv.innerHTML = '❌ Pas tout à fait. Essaie encore. (Tu as dit: "' + spoken + '")';
                 }}
@@ -412,15 +645,16 @@ def main_app():
         with col5:
             if st.button("🗣 Pronon", use_container_width=True):
                 st.session_state.etape = "prononciation"
+                st.session_state.prononciation_reussie = False
                 st.rerun()
         
         st.markdown("---")
         
-        # Gestion de la redirection pour prononciation
-        if "pronounce_success" in st.query_params:
-            # Changer de mot et supprimer le paramètre
-            st.session_state.mot_prononciation = random.choice(mots_prononciation)
-            st.query_params.clear()  # Efface tous les paramètres
+        # Traitement des messages du composant de prononciation
+        if "pronunciation_success" in st.query_params:
+            st.session_state.prononciation_reussie = True
+            # On efface le paramètre pour éviter les boucles
+            st.query_params.clear()
             st.rerun()
         
         # Affichage selon l'étape
@@ -549,7 +783,31 @@ def main_app():
             st.markdown(f"<div class='pronunciation-box'>🔊 {mot}</div>", unsafe_allow_html=True)
             
             # Intégration du composant HTML
-            st.components.v1.html(pronunciation_component(mot), height=350)
+            html = pronunciation_component(mot)
+            st.components.v1.html(html, height=350)
+            
+            # Zone de réception des messages (via query param)
+            if not st.session_state.prononciation_reussie:
+                st.info("Prononce le mot correctement pour débloquer le bouton 'Suivant'.")
+            else:
+                st.success("✅ Bonne prononciation !")
+                if st.button("➡️ Mot suivant", use_container_width=True):
+                    st.session_state.mot_prononciation = random.choice(mots_prononciation)
+                    st.session_state.prononciation_reussie = False
+                    st.rerun()
+            
+            # Détection du message de succès via JavaScript
+            # On utilise un composant caché pour écouter les messages
+            st.markdown("""
+            <script>
+            window.addEventListener('message', function(event) {
+                if (event.data.type === 'pronunciation_success') {
+                    // Rediriger avec un paramètre pour indiquer le succès
+                    window.location.href = window.location.href.split('?')[0] + '?pronunciation_success=true';
+                }
+            });
+            </script>
+            """, unsafe_allow_html=True)
             
             if st.button("🔙 Retour"):
                 st.session_state.etape = "menu"
@@ -562,7 +820,7 @@ def main_app():
             - **📚 Vocabulaire** : Apprends de nouveaux mots avec des quiz.
             - **🔤 Verbes** : Entraîne-toi sur les verbes irréguliers (QCM).
             - **💬 Phrase** : Traduis une phrase française en anglais (3 essais).
-            - **🗣 Prononciation** : Écoute et répète des mots pour améliorer ton accent (passe automatiquement au suivant si réussi).
+            - **🗣 Prononciation** : Écoute et répète des mots pour améliorer ton accent.
             """)
         
         st.markdown('</div>', unsafe_allow_html=True)
