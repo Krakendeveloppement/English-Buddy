@@ -176,14 +176,6 @@ st.markdown("""
         font-size: 0.9em;
         opacity: 0.7;
     }
-    .pronunciation-box {
-        text-align: center;
-        padding: 30px;
-        font-size: 2em;
-        border: 3px dashed var(--accent);
-        border-radius: 50px;
-        margin: 20px 0;
-    }
 </style>
 """, unsafe_allow_html=True)
 
