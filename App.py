@@ -788,13 +788,13 @@ def main_app():
             
             # Zone de réception des messages (via query param)
             if not st.session_state.prononciation_reussie:
-    st.info("Prononce le mot correctement pour débloquer le bouton 'Suivant'.")
-else:
-    st.success("✅ Bonne prononciation !")
-    if st.button("➡️ Mot suivant", use_container_width=True):
-        st.session_state.mot_prononciation = random.choice(mots_prononciation)
-        st.session_state.prononciation_reussie = False
-        st.rerun()
+                st.info("Prononce le mot correctement pour débloquer le bouton 'Suivant'.")
+            else:
+                st.success("✅ Bonne prononciation !")
+                if st.button("➡️ Mot suivant", use_container_width=True):
+                    st.session_state.mot_prononciation = random.choice(mots_prononciation)
+                    st.session_state.prononciation_reussie = False
+                    st.rerun()
             
             # Détection du message de succès via JavaScript
             # On utilise un composant caché pour écouter les messages
