@@ -16,73 +16,166 @@ st.set_page_config(
 # CSS personnalisé avec couleurs améliorées
 st.markdown("""
 <style>
-    /* Boutons plus grands et espacés */
+    /* Variables pour les deux thèmes */
+    :root {
+        --bg-primary: #f0f2f6;
+        --bg-secondary: #ffffff;
+        --text-primary: #000000;
+        --text-secondary: #333333;
+        --accent-color: #4CAF50;
+        --accent-hover: #45a049;
+        --border-color: #ddd;
+        --bot-message-bg: rgba(200, 200, 200, 0.9);
+        --user-message-bg: rgba(173, 216, 230, 0.9);
+    }
+
+    /* Adaptation au mode sombre */
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --bg-primary: #1e1e1e;
+            --bg-secondary: #2d2d2d;
+            --text-primary: #ffffff;
+            --text-secondary: #e0e0e0;
+            --accent-color: #6bb86b;
+            --accent-hover: #5ca65c;
+            --border-color: #555;
+            --bot-message-bg: rgba(60, 60, 60, 0.95);
+            --user-message-bg: rgba(0, 100, 148, 0.9);
+        }
+    }
+
+    /* Style global */
+    .stApp {
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+    }
+
+    /* Boutons */
     .stButton button {
         width: 100%;
-        height: 3em;
-        font-size: 1.2em;
+        height: 3.5em;
+        font-size: 1.1em;
         margin: 5px 0;
-        background-color: #4CAF50;
+        background-color: var(--accent-color);
         color: white;
         font-weight: bold;
         border: none;
-        border-radius: 10px;
+        border-radius: 12px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        transition: all 0.3s ease;
     }
     .stButton button:hover {
-        background-color: #45a049;
+        background-color: var(--accent-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
     }
-    /* Zone de texte plus confortable */
+
+    /* Zone de texte */
     .stTextInput input {
         font-size: 1.1em;
-        padding: 10px;
-        border-radius: 10px;
-        border: 2px solid #4CAF50;
+        padding: 12px;
+        border-radius: 12px;
+        border: 2px solid var(--accent-color);
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
     }
+
     /* Messages du bot */
     .bot-message {
-        background-color: #D3D3D3;
-        color: #000000;
-        border-radius: 20px;
+        background-color: var(--bot-message-bg);
+        color: var(--text-primary);
+        border-radius: 20px 20px 20px 5px;
         padding: 15px;
         margin: 10px 0;
         font-size: 1.1em;
-        border: 1px solid #888;
+        border: 1px solid var(--border-color);
+        backdrop-filter: blur(5px);
     }
+
     /* Messages de l'utilisateur */
     .user-message {
-        background-color: #ADD8E6;
-        color: #000000;
-        border-radius: 20px;
-        padding: 10px 15px;
+        background-color: var(--user-message-bg);
+        color: var(--text-primary);
+        border-radius: 20px 20px 5px 20px;
+        padding: 12px 18px;
         margin: 5px 0;
         text-align: right;
-        border: 1px solid #2a7a9e;
+        border: 1px solid var(--border-color);
+        backdrop-filter: blur(5px);
     }
+
     /* Titre principal */
     .title {
         text-align: center;
         font-size: 2.5em;
-        color: #1e88e5;
-        text-shadow: 2px 2px 4px #aaa;
+        color: var(--accent-color);
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        margin-bottom: 5px;
     }
+
+    /* Sous-titre (created by) */
+    .subtitle {
+        text-align: center;
+        font-size: 1.1em;
+        color: var(--text-secondary);
+        margin-top: 0;
+        margin-bottom: 20px;
+    }
+
     /* Pied de page */
     .footer {
         text-align: center;
-        margin-top: 30px;
-        font-size: 0.9em;
-        color: #666;
-    }
-    /* Style pour les cartes de menu */
-    .menu-card {
-        background-color: #f9f9f9;
-        border-radius: 15px;
+        margin-top: 40px;
         padding: 15px;
-        margin: 10px 0;
-        border: 1px solid #ddd;
-        text-align: center;
+        font-size: 0.95em;
+        color: var(--text-secondary);
+        border-top: 1px solid var(--border-color);
+    }
+
+    /* Cartes de menu */
+    .menu-card {
+        background-color: var(--bg-secondary);
+        border-radius: 20px;
+        padding: 20px;
+        margin: 15px 0;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    /* Grille des boutons du menu principal */
+    .menu-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin: 20px 0;
+    }
+
+    /* Style des métriques (score) */
+    .stMetric {
+        background-color: var(--bg-secondary);
+        padding: 15px;
+        border-radius: 15px;
+        border: 1px solid var(--border-color);
+    }
+    .stMetric label {
+        color: var(--text-secondary) !important;
+    }
+    .stMetric [data-testid="stMetricValue"] {
+        color: var(--accent-color) !important;
+        font-size: 2em !important;
+    }
+
+    /* Sidebar */
+    .css-1d391kg, .css-12oz5g7 {
+        background-color: var(--bg-secondary);
+    }
+
+    /* Messages d'info/success/error */
+    .stAlert {
+        border-radius: 12px;
+        border-left: 5px solid var(--accent-color);
     }
 </style>
-""", unsafe_allow_html=True)
 
 # -------------------------------
 # DONNÉES ÉLARGIES
