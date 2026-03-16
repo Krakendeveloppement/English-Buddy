@@ -14,7 +14,7 @@ st.set_page_config(
 )
 
 # -------------------------------
-# CSS PERSONNALISÉ (adaptatif clair/sombre)
+# CSS PERSONNALISÉ (adaptatif clair/sombre + fond mots)
 # -------------------------------
 st.markdown("""
 <style>
@@ -29,6 +29,7 @@ st.markdown("""
         --border-color: #ddd;
         --bot-message-bg: rgba(200, 200, 200, 0.9);
         --user-message-bg: rgba(173, 216, 230, 0.9);
+        --overlay-bg: rgba(255, 255, 255, 0.85);
     }
 
     /* Adaptation au mode sombre */
@@ -43,7 +44,45 @@ st.markdown("""
             --border-color: #555;
             --bot-message-bg: rgba(60, 60, 60, 0.95);
             --user-message-bg: rgba(0, 100, 148, 0.9);
+            --overlay-bg: rgba(30, 30, 30, 0.85);
         }
+    }
+
+    /* Fond avec mots en arrière-plan */
+    .background-words {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        overflow: hidden;
+        pointer-events: none;
+        opacity: 0.15;
+        font-size: 1.2rem;
+        color: var(--text-secondary);
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        justify-content: space-around;
+        padding: 20px;
+    }
+    .background-words span {
+        margin: 15px;
+        white-space: nowrap;
+        transform: rotate(-5deg);
+        font-weight: bold;
+    }
+
+    /* Conteneur principal pour que le contenu soit lisible */
+    .main-content {
+        position: relative;
+        z-index: 1;
+        background-color: var(--overlay-bg);
+        border-radius: 20px;
+        padding: 20px;
+        margin: 10px 0;
+        backdrop-filter: blur(2px);
     }
 
     /* Style global */
@@ -177,15 +216,53 @@ st.markdown("""
         border-radius: 12px;
         border-left: 5px solid var(--accent-color);
     }
+
+    /* Selectbox */
+    .stSelectbox div[data-baseweb="select"] {
+        background-color: var(--bg-secondary);
+        border-radius: 12px;
+    }
 </style>
 """, unsafe_allow_html=True)
 
 # -------------------------------
-# DONNÉES ÉLARGIES
+# FOND AVEC MOTS (background)
+# -------------------------------
+# Générer une liste de paires de mots pour le fond
+background_pairs = [
+    ("bonjour", "hello"), ("merci", "thank you"), ("maison", "house"), ("voiture", "car"),
+    ("chat", "cat"), ("chien", "dog"), ("manger", "eat"), ("boire", "drink"),
+    ("soleil", "sun"), ("lune", "moon"), ("étoile", "star"), ("ciel", "sky"),
+    ("grand", "big"), ("petit", "small"), ("content", "happy"), ("triste", "sad"),
+    ("livre", "book"), ("stylo", "pen"), ("table", "table"), ("chaise", "chair"),
+    ("eau", "water"), ("feu", "fire"), ("terre", "earth"), ("air", "air"),
+    ("jour", "day"), ("nuit", "night"), ("semaine", "week"), ("mois", "month"),
+    ("père", "father"), ("mère", "mother"), ("frère", "brother"), ("sœur", "sister"),
+    ("école", "school"), ("professeur", "teacher"), ("étudiant", "student"),
+    ("ordinateur", "computer"), ("téléphone", "phone"), ("ville", "city"),
+    ("mer", "sea"), ("montagne", "mountain"), ("forêt", "forest"),
+    ("pomme", "apple"), ("banane", "banana"), ("orange", "orange"), ("fraise", "strawberry"),
+    ("pain", "bread"), ("fromage", "cheese"), ("lait", "milk"), ("œuf", "egg"),
+    ("rouge", "red"), ("bleu", "blue"), ("vert", "green"), ("jaune", "yellow")
+]
+
+# Mélanger pour avoir un ordre aléatoire
+random.shuffle(background_pairs)
+
+# Construire le HTML du fond
+background_html = '<div class="background-words">'
+for fr, en in background_pairs[:40]:  # Limiter pour ne pas surcharger
+    background_html += f'<span>{fr} → {en}</span>'
+background_html += '</div>'
+
+st.markdown(background_html, unsafe_allow_html=True)
+
+# -------------------------------
+# DONNÉES PAR NIVEAU
 # -------------------------------
 
-# Vocabulaire français -> anglais (200+ mots)
-vocabulaire = {
+# Vocabulaire débutant (mots simples et courants)
+vocabulaire_debutant = {
     "bonjour": "hello", "merci": "thank you", "au revoir": "goodbye", "maison": "house",
     "voiture": "car", "chien": "dog", "chat": "cat", "manger": "eat", "boire": "drink",
     "dormir": "sleep", "aimer": "love", "parler": "speak", "travail": "work", "école": "school",
@@ -193,14 +270,15 @@ vocabulaire = {
     "fenêtre": "window", "soleil": "sun", "lune": "moon", "étoile": "star", "ciel": "sky",
     "eau": "water", "feu": "fire", "terre": "earth", "air": "air", "grand": "big",
     "petit": "small", "chaud": "hot", "froid": "cold", "content": "happy", "triste": "sad",
-    "vite": "fast", "lent": "slow", "maintenant": "now", "plus tard": "later", "jour": "day",
-    "nuit": "night", "semaine": "week", "mois": "month", "année": "year", "aujourd'hui": "today",
-    "demain": "tomorrow", "hier": "yesterday", "homme": "man", "femme": "woman", "enfant": "child",
-    "père": "father", "mère": "mother", "frère": "brother", "sœur": "sister", "ami": "friend",
-    "école": "school", "université": "university", "professeur": "teacher", "étudiant": "student",
-    "livre": "book", "cahier": "notebook", "ordinateur": "computer", "téléphone": "phone",
-    "voiture": "car", "bus": "bus", "train": "train", "avion": "plane", "bateau": "boat",
-    "ville": "city", "campagne": "countryside", "mer": "sea", "montagne": "mountain", "forêt": "forest",
+    "vite": "fast", "lent": "slow", "jour": "day", "nuit": "night", "homme": "man",
+    "femme": "woman", "enfant": "child", "père": "father", "mère": "mother", "frère": "brother",
+    "sœur": "sister", "ami": "friend", "ville": "city", "mer": "sea", "montagne": "mountain"
+}
+
+# Vocabulaire intermédiaire (plus varié)
+vocabulaire_intermediaire = {
+    "ordinateur": "computer", "téléphone": "phone", "bus": "bus", "train": "train",
+    "avion": "plane", "bateau": "boat", "campagne": "countryside", "forêt": "forest",
     "animal": "animal", "oiseau": "bird", "poisson": "fish", "cheval": "horse", "vache": "cow",
     "cochon": "pig", "poulet": "chicken", "mouton": "sheep", "lion": "lion", "tigre": "tiger",
     "éléphant": "elephant", "girafe": "giraffe", "singe": "monkey", "serpent": "snake",
@@ -216,7 +294,33 @@ vocabulaire = {
     "orange": "orange", "violet": "purple"
 }
 
-# Verbes irréguliers (base, prétérit, participe passé)
+# Vocabulaire professionnel (mots techniques, affaires, etc.)
+vocabulaire_professionnel = {
+    "réunion": "meeting", "contrat": "contract", "client": "client", "fournisseur": "supplier",
+    "marché": "market", "vente": "sale", "achat": "purchase", "négociation": "negotiation",
+    "stratégie": "strategy", "objectif": "goal", "performance": "performance", "bénéfice": "profit",
+    "perte": "loss", "investissement": "investment", "budget": "budget", "prévision": "forecast",
+    "analyse": "analysis", "rapport": "report", "présentation": "presentation", "projet": "project",
+    "délai": "deadline", "livrable": "deliverable", "ressource": "resource", "équipe": "team",
+    "management": "management", "leadership": "leadership", "compétence": "skill", "formation": "training",
+    "embauche": "hiring", "entretien": "interview", "salaire": "salary", "avantage": "benefit",
+    "contrat": "contract", "CDI": "permanent contract", "CDD": "fixed-term contract", "stage": "internship",
+    "alternance": "work-study", "télétravail": "remote work", "bureau": "office", "ordinateur": "computer",
+    "logiciel": "software", "matériel": "hardware", "réseau": "network", "sécurité": "security",
+    "donnée": "data", "base de données": "database", "application": "application", "site web": "website"
+}
+
+# Fusionner tous les vocabulaires pour avoir une base complète (mais on utilisera le niveau choisi)
+tous_vocabulaires = {**vocabulaire_debutant, **vocabulaire_intermediaire, **vocabulaire_professionnel}
+
+# Dictionnaire pour accéder au vocabulaire selon le niveau
+vocabulaire_par_niveau = {
+    "Débutant": vocabulaire_debutant,
+    "Intermédiaire": vocabulaire_intermediaire,
+    "Professionnel": vocabulaire_professionnel
+}
+
+# Verbes irréguliers (inchangés)
 verbes_irreguliers = [
     {"base": "be", "preterit": "was/were", "participe": "been", "francais": "être"},
     {"base": "have", "preterit": "had", "participe": "had", "francais": "avoir"},
@@ -240,7 +344,7 @@ verbes_irreguliers = [
     {"base": "swim", "preterit": "swam", "participe": "swum", "francais": "nager"}
 ]
 
-# Phrases du jour (thèmes variés)
+# Phrases du jour (inchangées)
 phrases_du_jour = [
     {"francais": "Quel temps fait-il aujourd'hui ?", "anglais": "What's the weather like today?"},
     {"francais": "Je voudrais un café, s'il vous plaît.", "anglais": "I would like a coffee, please."},
@@ -254,7 +358,7 @@ phrases_du_jour = [
     {"francais": "À plus tard.", "anglais": "See you later."}
 ]
 
-# Réponses du bot (conversation)
+# Réponses du bot (conversation) - inchangées
 reponses_bot = {
     "salutation": [
         "Hello! How are you today?",
@@ -290,7 +394,7 @@ reponses_bot = {
     ]
 }
 
-# Leçons du jour (grammaire)
+# Leçons du jour (inchangées)
 lecons_journalieres = {
     "lundi": "📘 **Present Simple** – I eat, you eat, he eats.",
     "mardi": "📙 **Past Simple** – I ate, you ate, he ate.",
@@ -300,9 +404,6 @@ lecons_journalieres = {
     "samedi": "📔 **Adjectives** – big, small, happy, sad.",
     "dimanche": "📒 **Adverbs** – quickly, slowly, well."
 }
-
-# Mots pour le jeu du pendu
-mots_pendu = ["hello", "world", "python", "english", "learn", "computer", "mobile", "language", "practice", "friend"]
 
 # -------------------------------
 # SESSION STATE
@@ -325,14 +426,8 @@ if "verbe_quiz" not in st.session_state:
     st.session_state.verbe_quiz = None
 if "phrase_jour" not in st.session_state:
     st.session_state.phrase_jour = None
-if "pendu_mot" not in st.session_state:
-    st.session_state.pendu_mot = ""
-if "pendu_lettres_trouvees" not in st.session_state:
-    st.session_state.pendu_lettres_trouvees = []
-if "pendu_essais" not in st.session_state:
-    st.session_state.pendu_essais = 0
-if "pendu_max_essais" not in st.session_state:
-    st.session_state.pendu_max_essais = 6
+if "niveau_utilisateur" not in st.session_state:
+    st.session_state.niveau_utilisateur = "Débutant"  # Par défaut
 
 # -------------------------------
 # FONCTIONS UTILITAIRES
@@ -360,7 +455,9 @@ def ajouter_point():
         st.balloons()
 
 def nouvelle_question_quiz():
-    mot_fr, mot_en = random.choice(list(vocabulaire.items()))
+    # Utiliser le vocabulaire du niveau choisi
+    vocab = vocabulaire_par_niveau[st.session_state.niveau_utilisateur]
+    mot_fr, mot_en = random.choice(list(vocab.items()))
     return mot_fr, mot_en
 
 def nouveau_verbe_quiz():
@@ -382,10 +479,6 @@ def nouveau_verbe_quiz():
 def nouvelle_phrase():
     return random.choice(phrases_du_jour)
 
-def nouveau_pendu():
-    mot = random.choice(mots_pendu)
-    return mot.lower(), [], 0
-
 # -------------------------------
 # INTERFACE PRINCIPALE
 # -------------------------------
@@ -398,6 +491,18 @@ with st.sidebar:
     st.header("📊 Ta progression")
     st.metric("Score", st.session_state.score)
     st.metric("Niveau", st.session_state.niveau)
+    
+    st.markdown("---")
+    st.markdown("**Choix du niveau**")
+    niveau_choisi = st.selectbox(
+        "Sélectionne ton niveau :",
+        options=["Débutant", "Intermédiaire", "Professionnel"],
+        index=0
+    )
+    if niveau_choisi != st.session_state.niveau_utilisateur:
+        st.session_state.niveau_utilisateur = niveau_choisi
+        st.rerun()
+    
     st.markdown("---")
     st.markdown("**Menu principal**")
     if st.button("🏠 Accueil", use_container_width=True):
@@ -414,16 +519,13 @@ with st.sidebar:
     if st.button("💬 Phrase du jour", use_container_width=True):
         st.session_state.etape = "phrase"
         st.session_state.phrase_jour = nouvelle_phrase()
-    if st.button("🎮 Jeu du pendu", use_container_width=True):
-        st.session_state.etape = "pendu"
-        mot, lettres, essais = nouveau_pendu()
-        st.session_state.pendu_mot = mot
-        st.session_state.pendu_lettres_trouvees = lettres
-        st.session_state.pendu_essais = essais
     if st.button("📖 Leçon du jour", use_container_width=True):
         st.session_state.etape = "lecon"
     st.markdown("---")
     st.markdown("Partage cette app avec tes amis ! 📲")
+
+# Conteneur principal pour le contenu (avec fond semi-transparent)
+st.markdown('<div class="main-content">', unsafe_allow_html=True)
 
 # -------------------------------
 # ÉCRAN MENU (amélioré)
@@ -436,7 +538,7 @@ if st.session_state.etape == "menu":
     </div>
     """, unsafe_allow_html=True)
     
-    # Grille de boutons 3x2
+    # Grille de boutons 3x2 (sans le pendu)
     st.markdown('<div class="menu-grid">', unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns(3)
@@ -468,13 +570,9 @@ if st.session_state.etape == "menu":
             st.session_state.phrase_jour = nouvelle_phrase()
             st.rerun()
     with col3:
-        if st.button("🎮 Pendu", use_container_width=True):
-            st.session_state.etape = "pendu"
-            mot, lettres, essais = nouveau_pendu()
-            st.session_state.pendu_mot = mot
-            st.session_state.pendu_lettres_trouvees = lettres
-            st.session_state.pendu_essais = essais
-            st.rerun()
+        # Le bouton Pendu est retiré, on met un placeholder vide ou on réorganise
+        # On peut laisser un espace vide ou rediriger vers autre chose, mais pour la symétrie on met un bouton inactif
+        st.markdown("<div style='visibility:hidden;'>x</div>", unsafe_allow_html=True)
     
     st.markdown('</div>', unsafe_allow_html=True)
     
@@ -482,9 +580,9 @@ if st.session_state.etape == "menu":
     st.markdown("""
     <div style="text-align:center; margin-top:20px; padding:15px; background-color:var(--bg-secondary); border-radius:15px; border:1px solid var(--border-color);">
         Plus tu pratiques, plus ton score augmente ! 🚀<br>
-        <span style="font-size:0.9em;">Partage cette app avec tes amis ! 📲</span>
+        <span style="font-size:0.9em;">Niveau actuel : <strong>{}</strong></span>
     </div>
-    """, unsafe_allow_html=True)
+    """.format(st.session_state.niveau_utilisateur), unsafe_allow_html=True)
 
 # -------------------------------
 # MODE CONVERSATION
@@ -519,6 +617,7 @@ elif st.session_state.etape == "conversation":
 # -------------------------------
 elif st.session_state.etape == "vocabulaire":
     st.markdown("## 📚 Mode Vocabulaire")
+    st.markdown(f"Niveau sélectionné : **{st.session_state.niveau_utilisateur}**")
     st.markdown("Traduis les mots du français à l'anglais.")
     
     if st.session_state.question_quiz is None:
@@ -623,65 +722,6 @@ elif st.session_state.etape == "phrase":
             st.rerun()
 
 # -------------------------------
-# MODE JEU DU PENDU
-# -------------------------------
-elif st.session_state.etape == "pendu":
-    st.markdown("## 🎮 Jeu du pendu")
-    st.markdown("Devine le mot anglais lettre par lettre.")
-    
-    mot = st.session_state.pendu_mot
-    lettres_trouvees = st.session_state.pendu_lettres_trouvees
-    essais = st.session_state.pendu_essais
-    max_essais = st.session_state.pendu_max_essais
-    
-    # Affichage du mot masqué
-    affichage = ""
-    for lettre in mot:
-        if lettre in lettres_trouvees:
-            affichage += lettre + " "
-        else:
-            affichage += "_ "
-    st.markdown(f"### {affichage}")
-    st.markdown(f"Essais restants : {max_essais - essais}/{max_essais}")
-    
-    if "_" not in affichage:
-        st.success("🎉 Bravo ! Tu as trouvé le mot !")
-        ajouter_point()
-        if st.button("🔁 Nouveau mot"):
-            mot, lettres, essais = nouveau_pendu()
-            st.session_state.pendu_mot = mot
-            st.session_state.pendu_lettres_trouvees = lettres
-            st.session_state.pendu_essais = essais
-            st.rerun()
-    elif essais >= max_essais:
-        st.error(f"💀 Perdu ! Le mot était : {mot}")
-        if st.button("🔁 Rejouer"):
-            mot, lettres, essais = nouveau_pendu()
-            st.session_state.pendu_mot = mot
-            st.session_state.pendu_lettres_trouvees = lettres
-            st.session_state.pendu_essais = essais
-            st.rerun()
-    else:
-        # Saisie d'une lettre
-        with st.form(key="pendu_form"):
-            lettre = st.text_input("Propose une lettre :", max_chars=1).lower()
-            submitted = st.form_submit_button("Essayer")
-            if submitted and lettre:
-                if lettre in lettres_trouvees:
-                    st.warning("Lettre déjà proposée.")
-                elif lettre in mot:
-                    st.success("Bonne lettre !")
-                    lettres_trouvees.append(lettre)
-                else:
-                    st.error("Mauvaise lettre.")
-                    st.session_state.pendu_essais += 1
-                st.rerun()
-    
-    if st.button("🔙 Retour au menu"):
-        st.session_state.etape = "menu"
-        st.rerun()
-
-# -------------------------------
 # MODE LEÇON DU JOUR
 # -------------------------------
 elif st.session_state.etape == "lecon":
@@ -729,6 +769,9 @@ elif st.session_state.etape == "lecon":
     if st.button("🔙 Retour au menu"):
         st.session_state.etape = "menu"
         st.rerun()
+
+# Fermeture du conteneur principal
+st.markdown('</div>', unsafe_allow_html=True)
 
 # -------------------------------
 # PIED DE PAGE
