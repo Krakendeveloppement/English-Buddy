@@ -73,14 +73,12 @@ if "phrase_courante" not in st.session_state:
     st.session_state.phrase_courante = None
 if "qcm_verbe" not in st.session_state:
     st.session_state.qcm_verbe = None
-if "mot_prononciation" not in st.session_state:
-    st.session_state.mot_prononciation = random.choice([
-        "hello", "world", "apple", "banana", "computer", "language", "practice",
-        "pronunciation", "speak", "listen", "learn", "english", "friend", "family",
-        "weather", "coffee", "restaurant", "beautiful", "interesting", "development"
-    ])
-if "prononciation_reussie" not in st.session_state:
-    st.session_state.prononciation_reussie = False
+if "question_quiz" not in st.session_state:
+    st.session_state.question_quiz = None
+if "reponse_quiz" not in st.session_state:
+    st.session_state.reponse_quiz = None
+if "nb_quiz" not in st.session_state:
+    st.session_state.nb_quiz = 0
 
 # -------------------------------
 # CSS PERSONNALISÉ (adaptatif)
@@ -380,13 +378,6 @@ lecons_journalieres = {
     "dimanche": "📒 **Adverbs** – quickly, slowly, well."
 }
 
-# Liste de mots pour la prononciation
-mots_prononciation = [
-    "hello", "world", "apple", "banana", "computer", "language", "practice",
-    "pronunciation", "speak", "listen", "learn", "english", "friend", "family",
-    "weather", "coffee", "restaurant", "beautiful", "interesting", "development"
-]
-
 # -------------------------------
 # FONCTIONS UTILITAIRES
 # -------------------------------
@@ -534,62 +525,6 @@ def auth_page():
         st.markdown('</div>', unsafe_allow_html=True)
 
 # -------------------------------
-# COMPOSANT DE PRONONCIATION AVEC BOUTON SUIVANT
-# -------------------------------
-def pronunciation_component(word):
-    """HTML/JS pour la prononciation. Envoie un message à Streamlit en cas de succès."""
-    html_code = f"""
-    <div style="text-align:center; padding:20px;">
-        <div style="font-size:3em; margin-bottom:20px;">🔊 {word}</div>
-        <button id="speak" style="font-size:1.5em; padding:10px 30px; border-radius:50px; background-color:#ff7f50; color:white; border:none; margin:10px; cursor:pointer;">🔊 Écouter</button>
-        <button id="listen" style="font-size:1.5em; padding:10px 30px; border-radius:50px; background-color:#6495ed; color:white; border:none; margin:10px; cursor:pointer;">🎤 Prononcer</button>
-        <div id="result" style="font-size:1.2em; margin-top:20px;"></div>
-    </div>
-    <script>
-        const word = "{word}";
-        const speakBtn = document.getElementById('speak');
-        const listenBtn = document.getElementById('listen');
-        const resultDiv = document.getElementById('result');
-        
-        speakBtn.addEventListener('click', function() {{
-            const utterance = new SpeechSynthesisUtterance(word);
-            utterance.lang = 'en-US';
-            window.speechSynthesis.speak(utterance);
-        }});
-        
-        listenBtn.addEventListener('click', function() {{
-            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-            recognition.lang = 'en-US';
-            recognition.interimResults = false;
-            recognition.maxAlternatives = 1;
-            
-            resultDiv.innerHTML = '🎤 Écoute... Parle maintenant.';
-            recognition.start();
-            
-            recognition.onresult = function(event) {{
-                const spoken = event.results[0][0].transcript.trim().toLowerCase();
-                const expected = word.toLowerCase();
-                // Comparaison simple (tolérance pour les petites erreurs)
-                const isCorrect = (spoken === expected) || (spoken.includes(expected) && expected.length > 3);
-                
-                if (isCorrect) {{
-                    resultDiv.innerHTML = '✅ Parfait !';
-                    // Envoyer un message à Streamlit pour indiquer le succès
-                    window.parent.postMessage({{ type: 'pronunciation_success', word: word }}, '*');
-                }} else {{
-                    resultDiv.innerHTML = '❌ Pas tout à fait. Essaie encore. (Tu as dit: "' + spoken + '")';
-                }}
-            }};
-            
-            recognition.onerror = function(event) {{
-                resultDiv.innerHTML = 'Erreur: ' + event.error;
-            }};
-        }});
-    </script>
-    """
-    return html_code
-
-# -------------------------------
 # APPLICATION PRINCIPALE
 # -------------------------------
 def main_app():
@@ -619,8 +554,8 @@ def main_app():
     with st.container():
         st.markdown('<div class="card">', unsafe_allow_html=True)
         
-        # Sélecteur d'activité
-        col1, col2, col3, col4, col5 = st.columns(5)
+        # Sélecteur d'activité (4 boutons, pas de prononciation)
+        col1, col2, col3, col4 = st.columns(4)
         with col1:
             if st.button("💬 Conv", use_container_width=True):
                 st.session_state.etape = "conversation"
@@ -642,20 +577,8 @@ def main_app():
                 st.session_state.essais_phrase = 0
                 st.session_state.phrase_courante = random.choice(phrases_du_jour)
                 st.rerun()
-        with col5:
-            if st.button("🗣 Pronon", use_container_width=True):
-                st.session_state.etape = "prononciation"
-                st.session_state.prononciation_reussie = False
-                st.rerun()
         
         st.markdown("---")
-        
-        # Traitement des messages du composant de prononciation
-        if "pronunciation_success" in st.query_params:
-            st.session_state.prononciation_reussie = True
-            # On efface le paramètre pour éviter les boucles
-            st.query_params.clear()
-            st.rerun()
         
         # Affichage selon l'étape
         if st.session_state.etape == "conversation":
@@ -775,44 +698,6 @@ def main_app():
                 st.session_state.etape = "menu"
                 st.rerun()
         
-        elif st.session_state.etape == "prononciation":
-            st.markdown("## 🗣 Prononciation")
-            st.markdown("Clique sur **Écouter** pour entendre le mot, puis sur **Prononcer** pour t'enregistrer.")
-            
-            mot = st.session_state.mot_prononciation
-            st.markdown(f"<div class='pronunciation-box'>🔊 {mot}</div>", unsafe_allow_html=True)
-            
-            # Intégration du composant HTML
-            html = pronunciation_component(mot)
-            st.components.v1.html(html, height=350)
-            
-            # Zone de réception des messages (via query param)
-            if not st.session_state.prononciation_reussie:
-                st.info("Prononce le mot correctement pour débloquer le bouton 'Suivant'.")
-            else:
-                st.success("✅ Bonne prononciation !")
-                if st.button("➡️ Mot suivant", use_container_width=True):
-                    st.session_state.mot_prononciation = random.choice(mots_prononciation)
-                    st.session_state.prononciation_reussie = False
-                    st.rerun()
-            
-            # Détection du message de succès via JavaScript
-            # On utilise un composant caché pour écouter les messages
-            st.markdown("""
-            <script>
-            window.addEventListener('message', function(event) {
-                if (event.data.type === 'pronunciation_success') {
-                    // Rediriger avec un paramètre pour indiquer le succès
-                    window.location.href = window.location.href.split('?')[0] + '?pronunciation_success=true';
-                }
-            });
-            </script>
-            """, unsafe_allow_html=True)
-            
-            if st.button("🔙 Retour"):
-                st.session_state.etape = "menu"
-                st.rerun()
-        
         else:  # menu
             st.markdown("### Bienvenue ! Choisis une activité ci-dessus.")
             st.markdown("""
@@ -820,7 +705,6 @@ def main_app():
             - **📚 Vocabulaire** : Apprends de nouveaux mots avec des quiz.
             - **🔤 Verbes** : Entraîne-toi sur les verbes irréguliers (QCM).
             - **💬 Phrase** : Traduis une phrase française en anglais (3 essais).
-            - **🗣 Prononciation** : Écoute et répète des mots pour améliorer ton accent.
             """)
         
         st.markdown('</div>', unsafe_allow_html=True)
